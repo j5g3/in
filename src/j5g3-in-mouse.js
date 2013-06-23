@@ -1,0 +1,118 @@
+/**
+ *
+ *
+ *
+ */
+
+(function(j5g3, window, undefined) {
+"use strict";
+
+
+/**
+ * @class Mouse Module
+ */
+j5g3.in.Modules.Mouse = j5g3.in.Module.extend({
+
+	/// Mouse x sensitivity
+	x_threshold: 4,
+	/// Mouse y sensitivity
+	y_threshold: 4,
+
+	// Bound X
+	bx: 0,
+	// Bound Y
+	by: 0,
+
+	/// Captures Mouse move event. Set to false to improve performance.
+	capture_move: true,
+
+	_calculate_bound: function()
+	{
+	var
+		el = this.el,
+		rect
+	;
+		// Some browsers, including cooconJS do not support getBoundingClientRect
+		if (el.getBoundingClientRect)
+		{
+			rect = el.getBoundingClientRect();
+			this.bx = rect.left;
+			this.by = rect.top;
+		} else
+		{
+			this.bx = el.clientLeft;
+			this.by = el.clientTop;
+		}
+	},
+
+	_calculate_pos: function(ev)
+	{
+	var
+		x = ev.pageX- this.bx,
+		y = ev.pageY- this.by
+	;
+		this.listener.set_pos(x, y);
+	},
+
+	_click: function(ev)
+	{
+	var
+		button = ({ 0: 'buttonY', 1: 'buttonX', 2: 'buttonA' })[ev.button]
+	;
+		this._calculate_pos(ev);
+		this.listener.fire(button , ev);
+
+		return false;
+	},
+/*
+	_mouseup: function(ev)
+	{
+	},
+
+	_mousedown: function(ev)
+	{
+	},
+*/
+
+	_mousemove: function(ev)
+	{
+		if (!this.capture_move)
+			return;
+
+		this._calculate_pos(ev);
+
+		if (Math.abs(this.listener.dx) > this.x_threshold ||
+			Math.abs(this.listener.dy) > this.y_threshold)
+		{
+			this.listener.fire('move', ev);
+		}
+	},
+
+	enable: function()
+	{
+//		this._on('mousedown', this._mousedown);
+//		this._on('mouseup', this._mouseup);
+		this._on('mousemove', this._mousemove);
+		this._on('click', this._click);
+		this._on('contextmenu', this._click);
+
+		this.handler.resize = this._calculate_bound.bind(this);
+		window.addEventListener('resize', this.handler.resize);
+
+		this._calculate_bound();
+	},
+
+	disable: function()
+	{
+//		this._un('mousedown');
+//		this._un('mouseup');
+		this._un('mousemove');
+		this._un('click');
+		this._un('contextmenu');
+
+		window.removeEventListener('resize', this.handler.resize);
+	}
+
+});
+
+})(this.j5g3, this);

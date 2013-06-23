@@ -1,0 +1,15 @@
+{
+	"name": "j5g3-in",
+	"author": "Giancarlo Bellido",
+	"version": "0.9.0",
+	"private": true,
+	
+	"devDependencies": {
+		"grunt": "*",
+		"grunt-contrib-jshint": "*",
+		"grunt-contrib-clean": "*",
+		"grunt-contrib-concat": "*",
+		"grunt-contrib-watch": "*",
+		"grunt-contrib-uglify": "*"
+	}
+}

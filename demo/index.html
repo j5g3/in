@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>j5g3-in Demo</title>
+		<style>
+			#demo { 
+				width: 800px; height: 400px; 
+				border: 2px solid #333;
+				margin-top: 20px;
+				position: relative;
+			}
+			
+			#event-name {
+				position: absolute;
+				font: 40px sans-serif;
+				top: 180px;
+				width: 800px;
+				text-align: center;
+			}
+			
+			body {
+				background: #eee;
+				width: 800px; padding: 8px;
+				margin: 10px auto;
+			}
+			
+			header > nav {
+				float: right;
+			}
+			
+			#logo { font: 30px sans-serif };
+		</style>
+	</head>
+	<body>
+		<header>
+			<nav>
+				<a href="http://github.com/giancarlo/mice.js">github</a>
+			</nav>
+			
+			<span id="logo">j5g3-in</span>
+		</header>
+		
+		
+		<div id="container">
+			<div id="demo">
+				<div id="pos"></div>
+				<div id="event-name"></div>
+			</div>
+		</div>
+		
+		<script src="../build/j5g3-in-standalone.js"></script>
+		<script>
+		var
+			eventName = document.getElementById('event-name'),
+			pos = document.getElementById('pos')
+		;
+		
+			j5g3.in({
+				
+				element: 'demo',
+				
+				on_fire: function(ev)
+				{
+					eventName.innerHTML = ev.name + '(' + ev.type + ')';
+					pos.innerHTML = this.x + ', ' + this.y;
+					ev.preventDefault();
+				}
+				
+			});
+			
+		</script>
+		
+	</body>
+</html>
