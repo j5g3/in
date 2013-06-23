@@ -11,7 +11,9 @@ module.exports = function(grunt) {
 			'j5g3in': {
 				options: { jshintrc: '.jshintrc' },
 				src: [
-					'src/j5g3-in.js', 'src/j5g3-in-mouse.js'
+					'src/j5g3-in.js', 'src/j5g3-in-mouse.js',
+					'src/j5g3-in-touch.js', 'src/j5g3-in-keyboard.js',
+					'src/j5g3-in-joystick.js'
 				]
 			}
 		},
