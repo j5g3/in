@@ -31,6 +31,7 @@ j5g3.extend(j5g3.in, {
 		/// Change of Y from previous event
 		dy: 0,
 
+		/// All included modules
 		module: null,
 
 		/// Element to atach events to.
