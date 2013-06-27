@@ -39,9 +39,14 @@ j5g3.extend(j5g3.in, {
 
 		init: function(p)
 		{
+			if (typeof(p)==='string')
+				p = { element: p };
+
 			j5g3.Class.apply(this, [ p ]);
 
-			if (typeof(this.element)==='string')
+			if (this.element === null)
+				this.element = window.document;
+			else if (typeof(this.element) === 'string')
 				this.element = j5g3.id(this.element);
 
 			this.module = {};

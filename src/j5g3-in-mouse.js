@@ -36,8 +36,8 @@ j5g3.in.Modules.Mouse = j5g3.in.Module.extend({
 		if (el.getBoundingClientRect)
 		{
 			rect = el.getBoundingClientRect();
-			this.bx = rect.left;
-			this.by = rect.top;
+			this.bx = window.scrollX + rect.left;
+			this.by = window.scrollY + rect.top;
 		} else
 		{
 			this.bx = el.clientLeft;
@@ -48,8 +48,8 @@ j5g3.in.Modules.Mouse = j5g3.in.Module.extend({
 	_calculate_pos: function(ev)
 	{
 	var
-		x = ev.pageX- this.bx,
-		y = ev.pageY- this.by
+		x = ev.pageX - this.bx,
+		y = ev.pageY - this.by
 	;
 		this.listener.set_pos(x, y);
 	},
@@ -96,8 +96,9 @@ j5g3.in.Modules.Mouse = j5g3.in.Module.extend({
 		this._on('click', this._click);
 		this._on('contextmenu', this._click);
 
-		this.handler.resize = this._calculate_bound.bind(this);
+		this.handler.scroll = this.handler.resize = this._calculate_bound.bind(this);
 		window.addEventListener('resize', this.handler.resize);
+		window.addEventListener('scroll', this.handler.scroll);
 
 		this._calculate_bound();
 	},
@@ -110,6 +111,7 @@ j5g3.in.Modules.Mouse = j5g3.in.Module.extend({
 		this._un('click');
 		this._un('contextmenu');
 
+		window.removeEventListener('scroll', this.handler.scroll);
 		window.removeEventListener('resize', this.handler.resize);
 	}
 
