@@ -14,9 +14,9 @@
 j5g3.in.Modules.Mouse = j5g3.in.Module.extend({
 
 	/// Mouse x sensitivity
-	x_threshold: 4,
+	x_threshold: 1,
 	/// Mouse y sensitivity
-	y_threshold: 4,
+	y_threshold: 1,
 
 	// Bound X
 	bx: 0,
