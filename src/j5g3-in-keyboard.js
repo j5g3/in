@@ -29,22 +29,13 @@ j5g3.in.Modules.Keyboard = j5g3.in.Module.extend({
 
 	keymap: null,
 
+	interval: 60,
+
+	keys: null,
+
 	_keydown: function(ev)
 	{
-	var
-		kc = ev.keyCode,
-		fn = this.keymap[kc]
-	;
-		if (fn)
-		{
-			this.listener.fire(fn, ev);
-
-			if (kc>32)
-			{
-				ev.direction = fn;
-				this.listener.fire('move', ev);
-			}
-		}
+		this.keys[ev.keyCode] = ev;
 	},
 
 	init: function(listener)
@@ -55,17 +46,39 @@ j5g3.in.Modules.Keyboard = j5g3.in.Module.extend({
 			j5g3.extend(this.keymap = {}, MAP);
 	},
 
-	_keyup: function()
+	_keyup: function(ev)
 	{
+		this.keys[ev.keyCode] = false;
+	},
 
+	_update: function()
+	{
+	var
+		fn, ev, key
+	;
+		for (key in this.keymap)
+			if ((ev =this.keys[key]) && (fn = this.keymap[key]))
+			{
+				this.listener.fire(fn, ev);
+
+				if (key > 32)
+				{
+					ev.direction = fn;
+					this.listener.fire('move', ev);
+				}
+			}
 	},
 
 	enable: function()
 	{
+		this.keys = {};
 		this.handler.keydown = this._keydown.bind(this);
 		this.handler.keyup = this._keyup.bind(this);
+		this.handler.update = this._update.bind(this);
+
 		document.addEventListener('keydown', this.handler.keydown);
 		document.addEventListener('keyup', this.handler.keyup);
+		this.intervalId = window.setInterval(this.handler.update, this.interval);
 	},
 
 	disable: function()
@@ -73,6 +86,7 @@ j5g3.in.Modules.Keyboard = j5g3.in.Module.extend({
 		// Keyboard Events
 		document.removeEventListener('keydown', this.handler.keydown);
 		document.removeEventListener('keyup', this.handler.keyup);
+		window.clearInterval(this.intervalId);
 	}
 
 });
