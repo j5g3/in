@@ -30,6 +30,7 @@ j5g3.in.Modules.Keyboard = j5g3.in.Module.extend({
 	keymap: null,
 
 	interval: 60,
+	intervalId: null,
 
 	keys: null,
 
