@@ -64,7 +64,11 @@ j5g3.extend(j5g3.in, {
 				this.on_fire(event);
 
 			if (this[event_name])
+			{
+				event.preventDefault();
 				return this[event_name](event);
+			}
+
 		},
 
 		set_pos: function(x, y)
