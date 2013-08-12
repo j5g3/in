@@ -84,6 +84,18 @@ j5g3.extend(j5g3.in, {
 		{
 			for (var i in this.module)
 				this.module[i].disable();
+		},
+
+		enable: function()
+		{
+			for (var i in this.module)
+				this.module[i].enable();
+		},
+
+		disable: function()
+		{
+			for (var i in this.module)
+				this.module[i].disable();
 		}
 
 	}),
@@ -96,17 +108,14 @@ j5g3.extend(j5g3.in, {
 		/// DOM Element to attach events to.
 		el: null,
 
-		/// Override this function
-		enable: function()
-		{
-
-		},
+		/// True if module is enabled. Read Only.
+		enabled: false,
 
 		/// Override this function
-		disable: function()
-		{
+		_enable: null,
 
-		},
+		/// Override this function
+		_disable: null,
 
 		init: function(listener)
 		{
@@ -129,6 +138,27 @@ j5g3.extend(j5g3.in, {
 		_un: function(name)
 		{
 			this.el.removeEventListener(name, this.handler[name]);
+		},
+
+		enable: function()
+		{
+			if (!this.enabled)
+			{
+				this._enable();
+				this.enabled = true;
+			}
+			return this;
+		},
+
+		disable: function()
+		{
+			if (this.enabled)
+			{
+				this._disable();
+				this.enabled = false;
+			}
+
+			return this;
 		}
 
 	})

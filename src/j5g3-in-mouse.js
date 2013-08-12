@@ -64,15 +64,6 @@ j5g3.in.Modules.Mouse = j5g3.in.Module.extend({
 
 		return false;
 	},
-/*
-	_mouseup: function(ev)
-	{
-	},
-
-	_mousedown: function(ev)
-	{
-	},
-*/
 
 	_mousemove: function(ev)
 	{
@@ -88,10 +79,8 @@ j5g3.in.Modules.Mouse = j5g3.in.Module.extend({
 		}
 	},
 
-	enable: function()
+	_enable: function()
 	{
-//		this._on('mousedown', this._mousedown);
-//		this._on('mouseup', this._mouseup);
 		this._on('mousemove', this._mousemove);
 		this._on('click', this._click);
 		this._on('contextmenu', this._click);
@@ -103,10 +92,8 @@ j5g3.in.Modules.Mouse = j5g3.in.Module.extend({
 		this._calculate_bound();
 	},
 
-	disable: function()
+	_disable: function()
 	{
-//		this._un('mousedown');
-//		this._un('mouseup');
 		this._un('mousemove');
 		this._un('click');
 		this._un('contextmenu');

@@ -116,14 +116,14 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 			this._flick_action(ev);
 	},
 
-	enable: function()
+	_enable: function()
 	{
 		this._on('touchmove', this._touchmove);
 		this._on('touchstart', this._touchstart);
 		this._on('touchend', this._touchend);
 	},
 
-	disable: function()
+	_disable: function()
 	{
 		this._un('touchmove');
 		this._un('touchstart');

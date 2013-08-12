@@ -10,11 +10,11 @@ if (!window.navigator.webkitGetGamepads)
 
 j5g3.in.Modules.Joystick= j5g3.in.Module.extend({
 
-	enable: function()
+	_enable: function()
 	{
 	},
 
-	disable: function()
+	_disable: function()
 	{
 
 	}
