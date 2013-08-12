@@ -74,6 +74,7 @@ j5g3.in.Modules.Keyboard = j5g3.in.Module.extend({
 
 	_enable: function()
 	{
+		this.keys = {};
 		this.handler.keydown = this._keydown.bind(this);
 		this.handler.keyup = this._keyup.bind(this);
 		this.handler.update = this._update.bind(this);

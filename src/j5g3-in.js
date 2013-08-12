@@ -57,11 +57,14 @@ j5g3.extend(j5g3.in, {
 
 		fire: function(event_name, event)
 		{
+			if (this.disabled)
+				return;
+
 			event.j5g3in = this;
 			event.name = event_name;
 
-			if (this.on_fire)
-				this.on_fire(event);
+			if (this.on_fire && this.on_fire(event)===false)
+				return;
 
 			if (this[event_name])
 			{
@@ -82,18 +85,19 @@ j5g3.extend(j5g3.in, {
 
 		destroy: function()
 		{
-			for (var i in this.module)
-				this.module[i].disable();
+			this.disable();
 		},
 
 		enable: function()
 		{
+			this.disabled = false;
 			for (var i in this.module)
 				this.module[i].enable();
 		},
 
 		disable: function()
 		{
+			this.disabled = true;
 			for (var i in this.module)
 				this.module[i].disable();
 		}
