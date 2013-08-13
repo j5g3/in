@@ -37,7 +37,9 @@ j5g3.in.Modules.Keyboard = j5g3.in.Module.extend({
 	_keydown: function(ev)
 	{
 		this.keys[ev.keyCode] = ev;
-		ev.preventDefault();
+
+		if (this.keymap[ev.keyCode])
+			ev.preventDefault();
 	},
 
 	init: function(listener)
