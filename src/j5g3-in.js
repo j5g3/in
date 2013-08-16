@@ -39,7 +39,7 @@ j5g3.extend(j5g3.in, {
 
 		init: function(p)
 		{
-			if (typeof(p)==='string')
+			if (typeof(p)==='string' || (typeof(p)==='object' && p.tagName))
 				p = { element: p };
 
 			j5g3.Class.apply(this, [ p ]);
