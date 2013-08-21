@@ -12,9 +12,9 @@ if (!('ontouchstart' in window.document))
 j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 
 	/// Amount of movement required for left/right events
-	x_threshold: 50,
+	x_threshold: 20,
 	/// Amount of movement required for up/down events
-	y_threshold: 50,
+	y_threshold: 20,
 	/// Flick threshold
 	flick_threshold: 120,
 
@@ -93,8 +93,6 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 
 		if (event_name)
 			this.listener.fire(event_name, ev);
-		else
-			this.listener.fire('buttonY', ev);
 	},
 
 	_touchstart: function(ev)
@@ -111,8 +109,9 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 		dt = Date.now() - this._touchstart_t
 	;
 		this._calculate_pos(ev);
-
-		if (dt < this.flick_delay)
+		if (dt < this.tap_delay)
+			this.listener.fire('buttonY', ev);
+		else if (dt < this.flick_delay)
 			this._flick_action(ev);
 	},
 
