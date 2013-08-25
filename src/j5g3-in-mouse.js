@@ -26,32 +26,9 @@ j5g3.in.Modules.Mouse = j5g3.in.Module.extend({
 	/// Captures Mouse move event. Set to false to improve performance.
 	capture_move: true,
 
-	_calculate_bound: function()
-	{
-	var
-		el = this.el,
-		rect
-	;
-		// Some browsers, including cooconJS do not support getBoundingClientRect
-		if (el.getBoundingClientRect)
-		{
-			rect = el.getBoundingClientRect();
-			this.bx = window.scrollX + rect.left;
-			this.by = window.scrollY + rect.top;
-		} else
-		{
-			this.bx = el.clientLeft;
-			this.by = el.clientTop;
-		}
-	},
-
 	_calculate_pos: function(ev)
 	{
-	var
-		x = ev.pageX - this.bx,
-		y = ev.pageY - this.by
-	;
-		this.listener.set_pos(x, y);
+		this.listener.set_pos(ev.pageX, ev.pageY);
 	},
 
 	_click: function(ev)
@@ -84,12 +61,6 @@ j5g3.in.Modules.Mouse = j5g3.in.Module.extend({
 		this._on('mousemove', this._mousemove);
 		this._on('click', this._click);
 		this._on('contextmenu', this._click);
-
-		this.handler.scroll = this.handler.resize = this._calculate_bound.bind(this);
-		window.addEventListener('resize', this.handler.resize);
-		window.addEventListener('scroll', this.handler.scroll);
-
-		this._calculate_bound();
 	},
 
 	_disable: function()
@@ -97,9 +68,6 @@ j5g3.in.Modules.Mouse = j5g3.in.Module.extend({
 		this._un('mousemove');
 		this._un('click');
 		this._un('contextmenu');
-
-		window.removeEventListener('scroll', this.handler.scroll);
-		window.removeEventListener('resize', this.handler.resize);
 	}
 
 });

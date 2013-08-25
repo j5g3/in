@@ -37,8 +37,15 @@ j5g3.extend(j5g3.in, {
 		/// Element to atach events to.
 		element: null,
 
+		/// Interval between events in microseconds.
+		interval: 60,
+		intervalId: null,
+
 		init: function(p)
 		{
+		var
+			me = this
+		;
 			if (typeof(p)==='string' || (typeof(p)==='object' && p.tagName))
 				p = { element: p };
 
@@ -49,10 +56,19 @@ j5g3.extend(j5g3.in, {
 			else if (typeof(this.element) === 'string')
 				this.element = j5g3.id(this.element);
 
-			this.module = {};
+			me.module = {};
+
+			me.poll = function() { me._poll(); };
+			me.calculate_bound = function(ev) { me._calculate_bound(ev); };
+
+			window.addEventListener('resize', this.calculate_bound);
+			window.addEventListener('scroll', this.calculate_bound);
+			this.intervalId = window.setInterval(this.poll, this.interval);
+
+			this.calculate_bound();
 
 			for (var i in j5g3.in.Modules)
-				this.module[i] = new j5g3.in.Modules[i](this);
+				me.module[i] = new j5g3.in.Modules[i](me);
 		},
 
 		fire: function(event_name, event)
@@ -71,11 +87,42 @@ j5g3.extend(j5g3.in, {
 				event.preventDefault();
 				return this[event_name](event);
 			}
-
 		},
 
+		_calculate_bound: function()
+		{
+		var
+			el = this.element,
+			rect
+		;
+			// Some browsers, including cooconJS do not support getBoundingClientRect
+			if (el.getBoundingClientRect)
+			{
+				rect = el.getBoundingClientRect();
+				this.bx = window.scrollX + rect.left;
+				this.by = window.scrollY + rect.top;
+			} else
+			{
+				this.bx = el.clientLeft;
+				this.by = el.clientTop;
+			}
+		},
+
+		_poll: function()
+		{
+			for (var i in this.module)
+				this.module[i].update();
+		},
+
+		/**
+		 * Calculates position relative to element.
+		 * x and y are in page coordinates.
+		 */
 		set_pos: function(x, y)
 		{
+			x = x - this.bx;
+			y = y - this.by;
+
 			this.dx = x - this.x;
 			this.dy = y - this.y;
 
@@ -86,11 +133,14 @@ j5g3.extend(j5g3.in, {
 		destroy: function()
 		{
 			this.disable();
+			window.removeEventListener('scroll', this.calculate_bound);
+			window.removeEventListener('resize', this.calculate_bound);
 		},
 
 		enable: function()
 		{
 			this.disabled = false;
+
 			for (var i in this.module)
 				this.module[i].enable();
 		},
@@ -98,6 +148,8 @@ j5g3.extend(j5g3.in, {
 		disable: function()
 		{
 			this.disabled = true;
+			window.clearInterval(this.poll);
+
 			for (var i in this.module)
 				this.module[i].disable();
 		}
@@ -128,6 +180,15 @@ j5g3.extend(j5g3.in, {
 			this.el = listener.element;
 
 			this.enable();
+		},
+
+
+		/**
+		 * function used to fire events
+		 */
+		update: function()
+		{
+
 		},
 
 		_on: function(name, fn)

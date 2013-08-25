@@ -29,9 +29,6 @@ j5g3.in.Modules.Keyboard = j5g3.in.Module.extend({
 
 	keymap: null,
 
-	interval: 60,
-	intervalId: null,
-
 	keys: null,
 
 	_keydown: function(ev)
@@ -57,7 +54,7 @@ j5g3.in.Modules.Keyboard = j5g3.in.Module.extend({
 		this.keys[ev.keyCode] = false;
 	},
 
-	_update: function()
+	update: function()
 	{
 	var
 		fn, ev, key
@@ -80,11 +77,9 @@ j5g3.in.Modules.Keyboard = j5g3.in.Module.extend({
 		this.keys = {};
 		this.handler.keydown = this._keydown.bind(this);
 		this.handler.keyup = this._keyup.bind(this);
-		this.handler.update = this._update.bind(this);
 
 		document.addEventListener('keydown', this.handler.keydown);
 		document.addEventListener('keyup', this.handler.keyup);
-		this.intervalId = window.setInterval(this.handler.update, this.interval);
 	},
 
 	_disable: function()
@@ -93,7 +88,6 @@ j5g3.in.Modules.Keyboard = j5g3.in.Module.extend({
 		// Keyboard Events
 		document.removeEventListener('keydown', this.handler.keydown);
 		document.removeEventListener('keyup', this.handler.keyup);
-		window.clearInterval(this.intervalId);
 	}
 
 });

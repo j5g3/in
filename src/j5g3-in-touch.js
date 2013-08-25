@@ -23,24 +23,23 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 	/// Delay of tap
 	tap_delay: 200,
 
-	_calculate_pos: function(ev)
+	_calculate_pos: function(ev, i)
 	{
 	var
-		touch = ev.changedTouches[0]
+		touch = ev.changedTouches[i]
 	;
 		this.listener.set_pos(touch.pageX, touch.pageY);
 	},
 
-	_touchmove: function(ev)
+	_domove: function(ev)
 	{
-		this._calculate_pos(ev);
+	var
+		x = this.listener.x, y = this.listener.y,
+		tdx = x - this._mx,
+		tdy = y - this._my,
+		event_name
+	;
 
-		var
-			x = this.listener.x, y = this.listener.y,
-			tdx = x - this._mx,
-			tdy = y - this._my,
-			event_name
-		;
 		if (tdx < -this.x_threshold)
 		{
 			this._mx = x;
@@ -69,6 +68,18 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 
 			ev.direction = event_name;
 			this.listener.fire('move', ev);
+		}
+	},
+
+	_touchmove: function(ev)
+	{
+	var
+		i = ev.length
+	;
+		while (i--)
+		{
+			this._calculate_pos(ev, i);
+			this._domove();
 		}
 	},
 
@@ -108,7 +119,7 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 	var
 		dt = Date.now() - this._touchstart_t
 	;
-		this._calculate_pos(ev);
+		this._calculate_pos(ev, 0);
 		if (dt < this.tap_delay)
 			this.listener.fire('buttonY', ev);
 		else if (dt < this.flick_delay)
