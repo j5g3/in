@@ -110,8 +110,9 @@ j5g3.extend(j5g3.in, {
 
 		_poll: function()
 		{
-			for (var i in this.module)
-				this.module[i].update();
+			if (this.disabled===false)
+				for (var i in this.module)
+					this.module[i].update();
 		},
 
 		/**
@@ -135,6 +136,7 @@ j5g3.extend(j5g3.in, {
 			this.disable();
 			window.removeEventListener('scroll', this.calculate_bound);
 			window.removeEventListener('resize', this.calculate_bound);
+			window.clearInterval(this.poll);
 		},
 
 		enable: function()
@@ -148,7 +150,6 @@ j5g3.extend(j5g3.in, {
 		disable: function()
 		{
 			this.disabled = true;
-			window.clearInterval(this.poll);
 
 			for (var i in this.module)
 				this.module[i].disable();

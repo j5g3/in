@@ -23,72 +23,79 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 	/// Delay of tap
 	tap_delay: 200,
 
-	_calculate_pos: function(ev, i)
+	/// List of active touches
+	touches: null,
+
+	_calculate_pos: function(touch)
 	{
-	var
-		touch = ev.changedTouches[i]
-	;
 		this.listener.set_pos(touch.pageX, touch.pageY);
 	},
 
-	_domove: function(ev)
+	each_touch: function(ev, callback)
 	{
 	var
-		x = this.listener.x, y = this.listener.y,
-		tdx = x - this._mx,
-		tdy = y - this._my,
+		touches = ev.changedTouches,
+		i = touches.length
+	;
+		while (i--)
+		{
+			this._calculate_pos(touches[i]);
+			window.console.log(touches[i], this.touches[touches[i].identifier]);
+			callback(ev, touches[i], this.touches[touches[i].identifier], this);
+		}
+	},
+
+	__touchmove: function(ev, t, obj, me)
+	{
+	var
+		x = me.listener.x, y = me.listener.y,
+		tdx = x - obj.mx,
+		tdy = y - obj.my,
 		event_name
 	;
 
-		if (tdx < -this.x_threshold)
+		if (tdx < -me.x_threshold)
 		{
-			this._mx = x;
+			obj.mx = x;
 			event_name = 'left';
 		}
-		else if (tdx > this.x_threshold)
+		else if (tdx > me.x_threshold)
 		{
-			this._mx = x;
+			obj.mx = x;
 			event_name = 'right';
 		}
 
-		if (tdy < -this.y_threshold)
+		if (tdy < -me.y_threshold)
 		{
-			this._my = y;
+			obj.my = y;
 			event_name = 'up' + (event_name ? '_' + event_name : '');
 
-		} else if (tdy > this.y_threshold)
+		} else if (tdy > me.y_threshold)
 		{
-			this._my = y;
+			obj.my = y;
 			event_name = 'down' + (event_name ? '_' + event_name : '');
 		}
 
 		if (event_name)
 		{
-			this.listener.fire(event_name, ev);
+			me.listener.fire(event_name, ev);
 
-			ev.direction = event_name;
-			this.listener.fire('move', ev);
+			me.direction = event_name;
+			me.listener.fire('move', ev);
 		}
 	},
 
 	_touchmove: function(ev)
 	{
-	var
-		i = ev.length
-	;
-		while (i--)
-		{
-			this._calculate_pos(ev, i);
-			this._domove();
-		}
+		this.each_touch(ev, this.__touchmove);
 	},
 
-	_flick_action: function(ev)
+	_flick_action: function(ev, obj)
 	{
 		var
 			x = this.listener.x, y = this.listener.y,
-			tdx = x - this._tx,
-			tdy = y - this._ty,
+			tdx = x - obj.tx,
+			tdy = y - obj.ty,
 			event_name
 		;
 
@@ -108,22 +115,31 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 
 	_touchstart: function(ev)
 	{
-		this._touchstart_t = Date.now();
+		this.each_touch(ev, function(ev, t, obj, me)
+		{
+			obj.touchstart_t = Date.now();
 
-		this._tx = this._mx = ev.touches[0].pageX;
-		this._ty = this._my = ev.touches[0].pageY;
+			obj.tx = obj.mx = me.listener.x;
+			obj.ty = obj.my = me.listener.y;
+		});
+	},
+
+	__touchend: function(ev, t, obj, me)
+	{
+	var
+		dt = Date.now() - obj.touchstart_t
+	;
+		obj.touchstart_t = 0;
+
+		if (dt < me.tap_delay)
+			return 'buttonY';
+		else if (dt < me.flick_delay)
+			me._flick_action(ev, obj);
 	},
 
 	_touchend: function(ev)
 	{
-	var
-		dt = Date.now() - this._touchstart_t
-	;
-		this._calculate_pos(ev, 0);
-		if (dt < this.tap_delay)
-			this.listener.fire('buttonY', ev);
-		else if (dt < this.flick_delay)
-			this._flick_action(ev);
+		this.each_touch(ev, this.__touchend);
 	},
 
 	_enable: function()
@@ -131,6 +147,11 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 		this._on('touchmove', this._touchmove);
 		this._on('touchstart', this._touchstart);
 		this._on('touchend', this._touchend);
+
+		this.touches = new Array(10);
+
+		for (var i=0; i<this.touches.length; i++)
+			this.touches[i] = {};
 	},
 
 	_disable: function()
