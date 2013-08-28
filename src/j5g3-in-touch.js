@@ -40,7 +40,6 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 		while (i--)
 		{
 			this._calculate_pos(touches[i]);
-			window.console.log(touches[i], this.touches[touches[i].identifier]);
 			callback(ev, touches[i], this.touches[touches[i].identifier], this);
 		}
 	},
