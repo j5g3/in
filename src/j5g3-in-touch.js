@@ -26,6 +26,14 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 	/// List of active touches
 	touches: null,
 
+	/// Type of touch movement, radial or linear
+	move_type: 'linear',
+
+	/// If move_type is radial, the initial pivot radius
+	radius: 50,
+	/// Pivot angle
+	angle: 0,
+
 	_calculate_pos: function(touch)
 	{
 		this.listener.set_pos(touch.pageX, touch.pageY);
@@ -40,9 +48,21 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 		while (i--)
 		{
 			this._calculate_pos(touches[i]);
-			window.console.log(touches[i], this.touches[touches[i].identifier]);
 			callback(ev, touches[i], this.touches[touches[i].identifier], this);
 		}
+	},
+
+	update: function()
+	{
+	var
+		touches = this.touches,
+		i
+	;
+		for (i in touches)
+			if (touches[i].touchstart_t)
+			{
+				this.listener.fire('buttonY', touches[i].ev);
+			}
 	},
 
 	__touchmove: function(ev, t, obj, me)
@@ -85,9 +105,29 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 		}
 	},
 
+	__touchradial: function(ev, t, obj, me)
+	{
+	var
+		x = me.listener.x, y = me.listener.y,
+		dx = obj.tx - x, dy = obj.ty - y,
+		rx = x - obj.pivotx, ry = y - obj.pivoty
+	;
+
+		if ((dx > me.x_threshold || dx < -me.x_threshold) &&
+			(dy > me.y_threshold || dy < -me.y_threshold))
+		{
+			ev.angle = Math.atan2(ry, rx);
+			me.listener.fire('move', ev);
+		}
+	},
+
 	_touchmove: function(ev)
 	{
-		this.each_touch(ev, this.__touchmove);
+		this.each_touch(ev, this.move_type==='linear' ?
+			this.__touchmove
+		:
+			this.__touchradial
+		);
 	},
 
 	_flick_action: function(ev, obj)
@@ -118,9 +158,16 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 		this.each_touch(ev, function(ev, t, obj, me)
 		{
 			obj.touchstart_t = Date.now();
+			obj.ev = ev;
 
 			obj.tx = obj.mx = me.listener.x;
 			obj.ty = obj.my = me.listener.y;
+
+			if (me.move_type==='radial')
+			{
+				obj.pivotx = obj.tx - Math.cos(me.angle) * me.radius;
+				obj.pivoty = obj.ty - Math.sin(me.angle) * me.radius;
+			}
 		});
 	},
 

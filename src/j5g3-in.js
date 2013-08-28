@@ -225,6 +225,17 @@ j5g3.extend(j5g3.in, {
 			}
 
 			return this;
+		},
+
+		destroy: function()
+		{
+			this.disable();
+			for (var i in this.listener.module)
+				if (this.listener.module[i]===this)
+				{
+					delete this.listener.module[i];
+					break;
+				}
 		}
 
 	})

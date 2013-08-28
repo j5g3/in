@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<meta name="viewport" content="width=1024, initial-scale=1.0, maximum-scale:1.0, user-scalable=no" />
 		<title>j5g3-in Demo</title>
 		<style>
 			#demo { 
@@ -44,6 +45,7 @@
 			<div id="demo">
 				<div id="pos"></div>
 				<div id="event-name"></div>
+				<div id="previous"></div>
 			</div>
 		</div>
 		
@@ -51,15 +53,22 @@
 		<script>
 		var
 			eventName = document.getElementById('event-name'),
-			pos = document.getElementById('pos')
+			pos = document.getElementById('pos'),
+			prev = document.getElementById('previous'),
+			input
 		;
-		
-			j5g3.in({
+			document.addEventListener('touchmove', function(ev) {
+				ev.preventDefault();
+	//			return false;
+			});
+			
+			input = j5g3.in({
 				
 				element: 'demo',
 				
 				on_fire: function(ev)
 				{
+					prev.innerHTML = eventName.innerHTML;
 					eventName.innerHTML = ev.name + '(' + ev.type + ')';
 					pos.innerHTML = this.x + ', ' + this.y;
 					ev.preventDefault();
