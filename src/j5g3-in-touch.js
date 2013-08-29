@@ -30,7 +30,7 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 	move_type: 'linear',
 
 	/// If move_type is radial, the initial pivot radius
-	radius: 50,
+	radius: 25,
 	/// Pivot angle
 	angle: 0,
 
@@ -48,8 +48,10 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 	;
 		while (i--)
 		{
-			id = this.touches[touches[i].identifier];
-			touch = this.touches[id] || (this.touches[id]={});
+			id = touches[i].identifier;
+			touch = this.touches[id] || (this.touches[id]={ id: id });
+			touch.ev = ev;
+			touch.touch = touches[id];
 
 			this._calculate_pos(touches[i]);
 			callback(ev, touches[i], touch, this);
@@ -63,10 +65,10 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 		i
 	;
 		for (i in touches)
-			if (touches[i].touchstart_t)
-			{
-				this.listener.fire('buttonY', touches[i].ev);
-			}
+		{
+			this.listener.set_pos(touches[i].mx, touches[i].my);
+			this.listener.fire('buttonY', touches[i].ev);
+		}
 	},
 
 	__touchmove: function(ev, t, obj, me)
@@ -182,12 +184,12 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 	var
 		dt = Date.now() - obj.touchstart_t
 	;
-		obj.touchstart_t = 0;
-
 		if (dt < me.tap_delay)
-			return 'buttonY';
+			me.listener.fire('buttonY', e);
 		else if (dt < me.flick_delay)
 			me._flick_action(e, obj);
+
+		delete me.touches[obj.id];
 	},
 
 	_touchend: function(ev)
