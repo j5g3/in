@@ -43,12 +43,16 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 	{
 	var
 		touches = ev.changedTouches,
-		i = touches.length
+		i = touches.length,
+		touch, id
 	;
 		while (i--)
 		{
+			id = this.touches[touches[i].identifier];
+			touch = this.touches[id] || (this.touches[id]={});
+
 			this._calculate_pos(touches[i]);
-			callback(ev, touches[i], this.touches[touches[i].identifier], this);
+			callback(ev, touches[i], touch, this);
 		}
 	},
 
@@ -153,25 +157,27 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 			this.listener.fire(event_name, ev);
 	},
 
-	_touchstart: function(ev)
+	__touchstart: function(ev, t, obj, me)
 	{
-		this.each_touch(ev, function(ev, t, obj, me)
+		obj.touchstart_t = Date.now();
+		obj.ev = ev;
+
+		obj.tx = obj.mx = me.listener.x;
+		obj.ty = obj.my = me.listener.y;
+
+		if (me.move_type==='radial')
 		{
-			obj.touchstart_t = Date.now();
-			obj.ev = ev;
-
-			obj.tx = obj.mx = me.listener.x;
-			obj.ty = obj.my = me.listener.y;
-
-			if (me.move_type==='radial')
-			{
-				obj.pivotx = obj.tx - Math.cos(me.angle) * me.radius;
-				obj.pivoty = obj.ty - Math.sin(me.angle) * me.radius;
-			}
-		});
+			obj.pivotx = obj.tx - Math.cos(me.angle) * me.radius;
+			obj.pivoty = obj.ty - Math.sin(me.angle) * me.radius;
+		}
 	},
 
-	__touchend: function(ev, t, obj, me)
+	_touchstart: function(ev)
+	{
+		this.each_touch(ev, this.__touchstart);
+	},
+
+	__touchend: function(e, t, obj, me)
 	{
 	var
 		dt = Date.now() - obj.touchstart_t
@@ -181,7 +187,7 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 		if (dt < me.tap_delay)
 			return 'buttonY';
 		else if (dt < me.flick_delay)
-			me._flick_action(ev, obj);
+			me._flick_action(e, obj);
 	},
 
 	_touchend: function(ev)
@@ -195,10 +201,7 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 		this._on('touchstart', this._touchstart);
 		this._on('touchend', this._touchend);
 
-		this.touches = new Array(10);
-
-		for (var i=0; i<this.touches.length; i++)
-			this.touches[i] = {};
+		this.touches = {};
 	},
 
 	_disable: function()
