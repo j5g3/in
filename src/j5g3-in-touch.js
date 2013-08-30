@@ -159,6 +159,12 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 			this.listener.fire(event_name, ev);
 	},
 
+	set_pivot: function(obj)
+	{
+		obj.pivotx = obj.tx - Math.cos(this.angle) * this.radius;
+		obj.pivoty = obj.ty - Math.sin(this.angle) * this.radius;
+	},
+
 	__touchstart: function(ev, t, obj, me)
 	{
 		obj.touchstart_t = Date.now();
@@ -168,10 +174,7 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 		obj.ty = obj.my = me.listener.y;
 
 		if (me.move_type==='radial')
-		{
-			obj.pivotx = obj.tx - Math.cos(me.angle) * me.radius;
-			obj.pivoty = obj.ty - Math.sin(me.angle) * me.radius;
-		}
+			me.set_pivot(obj);
 	},
 
 	_touchstart: function(ev)
