@@ -31,6 +31,12 @@ j5g3.extend(j5g3.in, {
 		/// Change of Y from previous event
 		dy: 0,
 
+		/// Scale of X position
+		sx: 1,
+
+		// Scale of y position
+		sy: 1,
+
 		/// All included modules
 		module: null,
 
@@ -121,8 +127,8 @@ j5g3.extend(j5g3.in, {
 		 */
 		set_pos: function(x, y)
 		{
-			x = x - this.bx;
-			y = y - this.by;
+			x = (x * this.sx) - this.bx;
+			y = (y * this.sy) - this.by;
 
 			this.dx = x - this.x;
 			this.dy = y - this.y;
