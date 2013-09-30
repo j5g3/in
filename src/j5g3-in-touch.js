@@ -6,8 +6,8 @@
 "use strict";
 
 // Detect touch support
-if (!('ontouchstart' in window.document))
-	return;
+//if (!('ontouchstart' in window.document))
+//	return;
 
 j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 
