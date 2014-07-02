@@ -47,6 +47,17 @@ j5g3.extend(j5g3.in, {
 		interval: 60,
 		intervalId: null,
 
+		/// Where event handlers are stored
+		handlers: null,
+
+		/**
+		 * Tells modules to load the minimal number of features to run. This will
+		 * disable move events for mouse.
+		 */
+		minimal: false,
+
+		disabled: false,
+
 		init: function(p)
 		{
 		var
@@ -55,7 +66,7 @@ j5g3.extend(j5g3.in, {
 			if (typeof(p)==='string' || (typeof(p)==='object' && p.tagName))
 				p = { element: p };
 
-			j5g3.Class.apply(this, [ p ]);
+			j5g3.Class.call(this, p);
 
 			if (this.element === null)
 				this.element = window.document;
@@ -63,6 +74,7 @@ j5g3.extend(j5g3.in, {
 				this.element = j5g3.id(this.element);
 
 			me.module = {};
+			me.handlers = {};
 
 			me.poll = function() { me._poll(); };
 			me.calculate_bound = function(ev) { me._calculate_bound(ev); };
@@ -77,6 +89,45 @@ j5g3.extend(j5g3.in, {
 				me.module[i] = new j5g3.in.Modules[i](me);
 		},
 
+		/**
+		 * Suspends events for the period of time specified by delay.
+		 */
+		suspend: function(delay)
+		{
+			var me = this;
+
+			me.disabled = true;
+			window.setTimeout(function() {
+				me.disabled = false;
+			}, delay);
+		},
+
+		/**
+		 * Register an event handler.
+		 * @param {string|object} event_name Name of the event or object with
+		 *                        event mappings.
+		 */
+		on: function(event_name, callback)
+		{
+			if (typeof event_name==='object')
+			{
+				for (var i in event_name)
+					this.on(i, event_name[i]);
+			} else
+			{
+				if (!callback)
+					throw new Error("callback parameter is required.");
+
+				var handler = this.handlers[event_name];
+
+				this.handlers[event_name] = handler ?
+					function(ev) { handler(ev); callback(ev); } :
+					callback;
+			}
+
+			return this;
+		},
+
 		fire: function(event_name, event)
 		{
 			if (this.disabled)
@@ -88,10 +139,10 @@ j5g3.extend(j5g3.in, {
 			if (this.on_fire && this.on_fire(event)===false)
 				return;
 
-			if (this[event_name])
+			if (this.handlers[event_name])
 			{
 				event.preventDefault();
-				return this[event_name](event);
+				return this.handlers[event_name](event);
 			}
 		},
 
@@ -140,6 +191,7 @@ j5g3.extend(j5g3.in, {
 		destroy: function()
 		{
 			this.disable();
+			this.handlers = null;
 			window.removeEventListener('scroll', this.calculate_bound);
 			window.removeEventListener('resize', this.calculate_bound);
 			window.clearInterval(this.poll);
@@ -187,6 +239,8 @@ j5g3.extend(j5g3.in, {
 			this.el = listener.element;
 
 			this.enable();
+			if (listener.minimal)
+				this._minimal();
 		},
 
 
@@ -242,6 +296,15 @@ j5g3.extend(j5g3.in, {
 					delete this.listener.module[i];
 					break;
 				}
+		}
+
+	}),
+
+	Button: j5g3.Class.extend({
+
+		init: function j5g3inButton(p)
+		{
+			j5g3.Class.call(this, p);
 		}
 
 	})

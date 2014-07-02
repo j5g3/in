@@ -12,16 +12,16 @@
 j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 
 	/// Amount of movement required for left/right events
-	x_threshold: 20,
+	x_threshold: 35,
 	/// Amount of movement required for up/down events
-	y_threshold: 20,
+	y_threshold: 35,
 	/// Flick threshold
-	flick_threshold: 120,
+	flick_threshold: 80,
 
 	flick_delay: 300,
 
 	/// Delay of tap
-	tap_delay: 200,
+	tap_delay: 300,
 
 	/// List of active touches
 	touches: null,
@@ -68,6 +68,7 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 		{
 			this.listener.set_pos(touches[i].mx, touches[i].my);
 			this.listener.fire('buttonY', touches[i].ev);
+			this.listener.fire('button', touches[i].ev);
 		}
 	},
 
@@ -77,9 +78,9 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 		x = me.listener.x, y = me.listener.y,
 		tdx = x - obj.mx,
 		tdy = y - obj.my,
+		dt = Date.now() - obj.touchstart_t,
 		event_name
 	;
-
 		if (tdx < -me.x_threshold)
 		{
 			obj.mx = x;
@@ -102,11 +103,11 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 			event_name = 'down' + (event_name ? '_' + event_name : '');
 		}
 
-		if (event_name)
+		me.direction = event_name;
+
+		if (event_name && dt > me.flick_delay)
 		{
 			me.listener.fire(event_name, ev);
-
-			me.direction = event_name;
 			me.listener.fire('move', ev);
 		}
 	},
@@ -157,6 +158,11 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 
 		if (event_name)
 			this.listener.fire(event_name, ev);
+		else if (this.direction)
+		{
+			this.listener.fire(this.direction, ev);
+			this.listener.fire('move', ev);
+		}
 	},
 
 	set_pivot: function(obj)
@@ -179,6 +185,7 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 
 	_touchstart: function(ev)
 	{
+		this.direction = false;
 		this.each_touch(ev, this.__touchstart);
 	},
 
@@ -187,7 +194,7 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 	var
 		dt = Date.now() - obj.touchstart_t
 	;
-		if (dt < me.tap_delay)
+		if (!me.direction && dt < me.tap_delay)
 			me.listener.fire('buttonY', e);
 		else if (dt < me.flick_delay)
 			me._flick_action(e, obj);

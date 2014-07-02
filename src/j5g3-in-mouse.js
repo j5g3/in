@@ -38,8 +38,14 @@ j5g3.in.Modules.Mouse = j5g3.in.Module.extend({
 	;
 		this._calculate_pos(ev);
 		this.listener.fire(button , ev);
+		this.listener.fire('button', ev);
 
 		return false;
+	},
+
+	_minimal: function()
+	{
+		this.capture_move = false;
 	},
 
 	_mousemove: function(ev)

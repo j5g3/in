@@ -43,7 +43,7 @@ j5g3.in.Modules.Keyboard = j5g3.in.Module.extend({
 	{
 		this.keys = {};
 
-		j5g3.in.Module.apply(this, [ listener]);
+		j5g3.in.Module.call(this, listener);
 
 		if (this.keymap===null)
 			j5g3.extend(this.keymap = {}, MAP);
@@ -60,8 +60,11 @@ j5g3.in.Modules.Keyboard = j5g3.in.Module.extend({
 		fn, ev, key
 	;
 		for (key in this.keymap)
-			if ((ev =this.keys[key]) && (fn = this.keymap[key]))
+		{
+			ev = this.keys[key];
+			if (ev)
 			{
+				fn = this.keymap[key];
 				this.listener.fire(fn, ev);
 
 				if (key > 32)
@@ -69,7 +72,10 @@ j5g3.in.Modules.Keyboard = j5g3.in.Module.extend({
 					ev.direction = fn;
 					this.listener.fire('move', ev);
 				}
+
+				this.listener.fire('button', ev);
 			}
+		}
 	},
 
 	_enable: function()
