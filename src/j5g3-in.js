@@ -243,6 +243,10 @@ j5g3.extend(j5g3.in, {
 				this._minimal();
 		},
 
+		_minimal: function()
+		{
+			this.minimal = true;
+		},
 
 		/**
 		 * function used to fire events
@@ -296,15 +300,6 @@ j5g3.extend(j5g3.in, {
 					delete this.listener.module[i];
 					break;
 				}
-		}
-
-	}),
-
-	Button: j5g3.Class.extend({
-
-		init: function j5g3inButton(p)
-		{
-			j5g3.Class.call(this, p);
 		}
 
 	})

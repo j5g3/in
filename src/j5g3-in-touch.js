@@ -20,11 +20,27 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 
 	flick_delay: 200,
 
+	/// Set a fixed pivot x coordinate for radial movement.
+	pivot_x: null,
+	/// Set a fixed pivot y coordinate for radial movement.
+	pivot_y: null,
+
 	/// List of active touches
 	touches: null,
 
 	/// Type of touch movement, radial or linear
-	move_type: 'linear',
+	_move_type: 'linear',
+
+	set move_type(val)
+	{
+		this._move_type = val;
+		this.__move = val==='linear' ? this.__touchmove : this.__touchradial;
+	},
+
+	get move_type()
+	{
+		return this._move_type;
+	},
 
 	/// If move_type is radial, the initial pivot radius
 	radius: 25,
@@ -33,6 +49,12 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 
 	/** Move detection algorithm */
 	__move: null,
+
+	init: function(p)
+	{
+		j5g3.in.Module.call(this, p);
+		this.move_type = this._move_type;
+	},
 
 	_calculate_pos: function(touch)
 	{
@@ -60,6 +82,8 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 
 	update: function()
 	{
+		if (this.minimal)
+			return;
 	var
 		touches = this.touches, touch, i
 	;
@@ -79,8 +103,12 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 	{
 		obj.moved = true;
 		this.listener.fire(obj.direction, obj.ev);
-		obj.ev.direction = obj.direction;
-		this.listener.fire('move', obj.ev);
+
+		if (!this.minimal)
+		{
+			obj.ev.direction = obj.direction;
+			this.listener.fire('move', obj.ev);
+		}
 	},
 
 	__touchmove: function(obj, me)
@@ -211,8 +239,6 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 		this._on('touchend', this._touchend);
 
 		this.touches = {};
-
-		this.__move = this.move_type==='linear' ? this.__touchmove : this.__touchradial;
 	},
 
 	_disable: function()

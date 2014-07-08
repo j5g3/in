@@ -19,6 +19,14 @@
 				width: 800px;
 				text-align: center;
 			}
+			#angle {
+				position: absolute; left: 50%; top: 100px; margin: -10px 0 0 -10px;
+				width: 20px; text-align: center; font-size: 20px; line-height: 20px;
+				-webkit-transform-origin: 10px 10px;
+				transform-origin: 10px 10px;
+				-moz-transform-origin: 10px 10px; 
+			}
+			#angle > span { display: inline-block; }
 			
 			body {
 				background: #eee;
@@ -39,11 +47,16 @@
 		<header>
 			<span id="logo">j5g3-in</span>
 		</header>
+		<div class="text-center">
+			<label><input type="checkbox" id="minimal"> Minimal</label>	
+			<label><input type="checkbox" id="radial"> Radial Touch</label>	
+		</div>
 		
 		<div id="container">
 			<div id="demo">
 				<div id="pos"></div>
 				<div id="event-name"></div>
+				<div id="angle"><span class="glyphicon glyphicon-arrow-up"></span></div>
 			</div>
 		</div>
 		<div id="log"></div>
@@ -52,6 +65,9 @@
 		<script>
 		var
 			eventName = document.getElementById('event-name'),
+			minimal = document.getElementById('minimal'),
+			radial = document.getElementById('radial'),
+			angle = document.getElementById('angle'),
 			pos = document.getElementById('pos'),
 			log = document.getElementById('log'),
 			input,
@@ -64,27 +80,48 @@
 				move: '<span class="glyphicon glyphicon-move"></span>'
 			}
 		;
+			minimal.onchange = radial.onchange = load;
+			
+			function on_fire(ev)
+			{
+				if (eventName.firstChild)
+					log.insertBefore(eventName.firstChild, log.firstChild);
+					
+				eventName.innerHTML = '<span><kbd title="' + ev.name + '">' + 
+					(map[ev.name] || ev.name) + '</kbd> (' + ev.type + ')</span>';
+				pos.innerHTML = this.x + ', ' + this.y + (ev.angle ? ', a: ' + ev.angle : '');
+				
+				if (ev.angle)
+				{
+					//angle.style.transform = 
+					angle.style.webkitTransform = 
+					angle.style.mozTransform =
+					'rotate(' + (ev.angle*180/Math.PI|0) + 'deg)';
+				}
+					
+				ev.preventDefault();
+			}
+			
+			function load()
+			{
+				if (input)
+					input.destroy();
+					
+				input = j5g3.in({
+					element: 'demo',
+					minimal: minimal.checked,
+					on_fire: on_fire
+				});
+				
+				if (radial.checked)
+					input.module.Touch.move_type = 'radial';
+			}
+			
 			document.addEventListener('touchmove', function(ev) {
 				ev.preventDefault();
 			});
 			
-			input = j5g3.in({
-				
-				element: 'demo',
-				
-				on_fire: function(ev)
-				{
-					if (eventName.firstChild)
-						log.insertBefore(eventName.firstChild, log.firstChild);
-						
-					eventName.innerHTML = '<span><kbd title="' + ev.name + '">' + 
-						(map[ev.name] || ev.name) + '</kbd> (' + ev.type + ')</span>';
-					pos.innerHTML = this.x + ', ' + this.y;
-					ev.preventDefault();
-				}
-				
-			});
-			
+			load();
 		</script>
 		
 	</body>
