@@ -3,6 +3,7 @@
 	<head>
 		<meta name="viewport" content="width=1024, initial-scale=1.0, maximum-scale:1.0, user-scalable=no" />
 		<title>j5g3-in Demo</title>
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" />
 		<style>
 			#demo { 
 				width: 800px; height: 400px; 
@@ -25,6 +26,8 @@
 				margin: 10px auto;
 			}
 			
+			#log > span { display: inline-block; margin-right: 10px; }
+			
 			header > nav {
 				float: right;
 			}
@@ -34,32 +37,35 @@
 	</head>
 	<body>
 		<header>
-			<nav>
-			</nav>
-			
 			<span id="logo">j5g3-in</span>
 		</header>
-		
 		
 		<div id="container">
 			<div id="demo">
 				<div id="pos"></div>
 				<div id="event-name"></div>
-				<div id="previous"></div>
 			</div>
 		</div>
+		<div id="log"></div>
 		
 		<script src="../build/j5g3-in-standalone.js"></script>
 		<script>
 		var
 			eventName = document.getElementById('event-name'),
 			pos = document.getElementById('pos'),
-			prev = document.getElementById('previous'),
-			input
+			log = document.getElementById('log'),
+			input,
+			map = {
+				buttonY: 'Y', buttonA: 'A', buttonB: 'B', buttonX: 'X',
+				up: '<span class="glyphicon glyphicon-arrow-up"></span>',
+				down: '<span class="glyphicon glyphicon-arrow-down"></span>',
+				left: '<span class="glyphicon glyphicon-arrow-left"></span>',
+				right: '<span class="glyphicon glyphicon-arrow-right"></span>',
+				move: '<span class="glyphicon glyphicon-move"></span>'
+			}
 		;
 			document.addEventListener('touchmove', function(ev) {
 				ev.preventDefault();
-	//			return false;
 			});
 			
 			input = j5g3.in({
@@ -68,8 +74,11 @@
 				
 				on_fire: function(ev)
 				{
-					prev.innerHTML = eventName.innerHTML;
-					eventName.innerHTML = ev.name + '(' + ev.type + ')';
+					if (eventName.firstChild)
+						log.insertBefore(eventName.firstChild, log.firstChild);
+						
+					eventName.innerHTML = '<span><kbd title="' + ev.name + '">' + 
+						(map[ev.name] || ev.name) + '</kbd> (' + ev.type + ')</span>';
 					pos.innerHTML = this.x + ', ' + this.y;
 					ev.preventDefault();
 				}

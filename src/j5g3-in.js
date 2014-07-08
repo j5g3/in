@@ -156,8 +156,8 @@ j5g3.extend(j5g3.in, {
 			if (el.getBoundingClientRect)
 			{
 				rect = el.getBoundingClientRect();
-				this.bx = window.scrollX + rect.left || 0;
-				this.by = window.scrollY + rect.top || 0;
+				this.bx = window.scrollX + (rect.left|0) || 0;
+				this.by = window.scrollY + (rect.top|0) || 0;
 			} else
 			{
 				this.bx = el.clientLeft || 0;

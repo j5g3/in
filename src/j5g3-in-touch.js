@@ -12,16 +12,13 @@
 j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 
 	/// Amount of movement required for left/right events
-	x_threshold: 35,
+	x_threshold: 20,
 	/// Amount of movement required for up/down events
-	y_threshold: 35,
+	y_threshold: 20,
 	/// Flick threshold
-	flick_threshold: 80,
+	flick_threshold: 70,
 
-	flick_delay: 300,
-
-	/// Delay of tap
-	tap_delay: 300,
+	flick_delay: 200,
 
 	/// List of active touches
 	touches: null,
@@ -33,6 +30,9 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 	radius: 25,
 	/// Pivot angle
 	angle: 0,
+
+	/** Move detection algorithm */
+	__move: null,
 
 	_calculate_pos: function(touch)
 	{
@@ -51,34 +51,44 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 			id = touches[i].identifier;
 			touch = this.touches[id] || (this.touches[id]={ id: id });
 			touch.ev = ev;
-			touch.touch = touches[id];
+			touch.touch = touches[i];
 
-			this._calculate_pos(touches[i]);
-			callback(ev, touches[i], touch, this);
+			this._calculate_pos(touch.touch);
+			callback(touch, this);
 		}
 	},
 
 	update: function()
 	{
 	var
-		touches = this.touches,
-		i
+		touches = this.touches, touch, i
 	;
 		for (i in touches)
 		{
-			this.listener.set_pos(touches[i].mx, touches[i].my);
-			this.listener.fire('buttonY', touches[i].ev);
-			this.listener.fire('button', touches[i].ev);
+			touch = touches[i];
+
+			if (!touch.moved)
+			{
+				this._calculate_pos(touch.touch);
+				this.listener.fire('buttonY', touch.ev);
+			}
 		}
 	},
 
-	__touchmove: function(ev, t, obj, me)
+	doMove: function(obj)
+	{
+		obj.moved = true;
+		this.listener.fire(obj.direction, obj.ev);
+		obj.ev.direction = obj.direction;
+		this.listener.fire('move', obj.ev);
+	},
+
+	__touchmove: function(obj, me)
 	{
 	var
 		x = me.listener.x, y = me.listener.y,
 		tdx = x - obj.mx,
 		tdy = y - obj.my,
-		dt = Date.now() - obj.touchstart_t,
 		event_name
 	;
 		if (tdx < -me.x_threshold)
@@ -103,16 +113,13 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 			event_name = 'down' + (event_name ? '_' + event_name : '');
 		}
 
-		me.direction = event_name;
+		obj.direction = event_name;
 
-		if (event_name && dt > me.flick_delay)
-		{
-			me.listener.fire(event_name, ev);
-			me.listener.fire('move', ev);
-		}
+		if (event_name)
+			me.doMove(obj);
 	},
 
-	__touchradial: function(ev, t, obj, me)
+	__touchradial: function(obj, me)
 	{
 	var
 		x = me.listener.x, y = me.listener.y,
@@ -123,21 +130,17 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 		if ((dx > me.x_threshold || dx < -me.x_threshold) &&
 			(dy > me.y_threshold || dy < -me.y_threshold))
 		{
-			ev.angle = Math.atan2(ry, rx);
-			me.listener.fire('move', ev);
+			obj.ev.angle = Math.atan2(ry, rx);
+			me.listener.fire('move', obj.ev);
 		}
 	},
 
 	_touchmove: function(ev)
 	{
-		this.each_touch(ev, this.move_type==='linear' ?
-			this.__touchmove
-		:
-			this.__touchradial
-		);
+		this.each_touch(ev, this.__move);
 	},
 
-	_flick_action: function(ev, obj)
+	_flick_action: function(obj)
 	{
 		var
 			x = this.listener.x, y = this.listener.y,
@@ -157,12 +160,9 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 			event_name = 'buttonB';
 
 		if (event_name)
-			this.listener.fire(event_name, ev);
-		else if (this.direction)
-		{
-			this.listener.fire(this.direction, ev);
-			this.listener.fire('move', ev);
-		}
+			this.listener.fire(event_name, obj.ev);
+		else if (obj.direction)
+			this.doMove(obj);
 	},
 
 	set_pivot: function(obj)
@@ -171,11 +171,12 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 		obj.pivoty = obj.ty - Math.sin(this.angle) * this.radius;
 	},
 
-	__touchstart: function(ev, t, obj, me)
+	__touchstart: function(obj, me)
 	{
-		obj.touchstart_t = Date.now();
-		obj.ev = ev;
+		obj.start = Date.now();
 
+		// tx, ty = First touch position
+		// mx, my = current touch position
 		obj.tx = obj.mx = me.listener.x;
 		obj.ty = obj.my = me.listener.y;
 
@@ -183,23 +184,19 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 			me.set_pivot(obj);
 	},
 
-	_touchstart: function(ev)
+	__touchend: function(obj, me)
 	{
-		this.direction = false;
-		this.each_touch(ev, this.__touchstart);
-	},
+		var dt = Date.now() - obj.start;
 
-	__touchend: function(e, t, obj, me)
-	{
-	var
-		dt = Date.now() - obj.touchstart_t
-	;
-		if (!me.direction && dt < me.tap_delay)
-			me.listener.fire('buttonY', e);
-		else if (dt < me.flick_delay)
-			me._flick_action(e, obj);
+		if (dt < me.flick_delay)
+			me._flick_action(obj);
 
 		delete me.touches[obj.id];
+	},
+
+	_touchstart: function(ev)
+	{
+		this.each_touch(ev, this.__touchstart);
 	},
 
 	_touchend: function(ev)
@@ -214,6 +211,8 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 		this._on('touchend', this._touchend);
 
 		this.touches = {};
+
+		this.__move = this.move_type==='linear' ? this.__touchmove : this.__touchradial;
 	},
 
 	_disable: function()
