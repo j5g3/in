@@ -158,7 +158,7 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 		if ((dx > me.x_threshold || dx < -me.x_threshold) &&
 			(dy > me.y_threshold || dy < -me.y_threshold))
 		{
-			obj.ev.angle = Math.atan2(ry, rx);
+			me.angle = obj.ev.angle = Math.atan2(ry, rx);
 			me.listener.fire('move', obj.ev);
 		}
 	},
@@ -195,8 +195,8 @@ j5g3.in.Modules.Touch = j5g3.in.Module.extend({
 
 	set_pivot: function(obj)
 	{
-		obj.pivotx = obj.tx - Math.cos(this.angle) * this.radius;
-		obj.pivoty = obj.ty - Math.sin(this.angle) * this.radius;
+		obj.pivotx = this.pivot_x || (obj.tx - Math.cos(this.angle) * this.radius);
+		obj.pivoty = this.pivot_y || (obj.ty - Math.sin(this.angle) * this.radius);
 	},
 
 	__touchstart: function(obj, me)
