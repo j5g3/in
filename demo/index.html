@@ -6,17 +6,15 @@
 		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" />
 		<style>
 			#demo { 
-				width: 800px; height: 400px; 
+				height: 400px; 
 				border: 2px solid #333;
 				margin-top: 20px;
 				position: relative;
 			}
 			
 			#event-name {
-				position: absolute;
+				margin-top: 180px;
 				font: 40px sans-serif;
-				top: 180px;
-				width: 800px;
 				text-align: center;
 			}
 			#angle {
@@ -28,48 +26,41 @@
 			}
 			#angle > span { display: inline-block; }
 			
-			body {
-				background: #eee;
-				width: 800px; padding: 8px;
-				margin: 10px auto;
-			}
+			body { background: #eee; }
 			
 			#log > span { display: inline-block; margin-right: 10px; }
-			
-			header > nav {
-				float: right;
-			}
-			
-			#logo { font: 30px sans-serif };
 		</style>
 	</head>
 	<body>
-		<header>
-			<span id="logo">j5g3-in</span>
-		</header>
-		<div class="text-center">
-			<label><input type="checkbox" id="minimal"> Minimal</label>	
-			<label><input type="checkbox" id="radial"> Radial Touch</label>	
-		</div>
-		
-		<div id="container">
+		<div class="container">
+			<header>
+				<h1>j5g3-in</h1>
+			</header>
+			<div class="text-center">
+				<label><input type="checkbox" id="minimal"> Minimal</label>	
+				<label><input type="checkbox" id="radial"> Radial Touch</label>	
+				<label><input type="checkbox" id="scale"> Scaling</label>	
+			</div>
 			<div id="demo">
 				<div id="pos"></div>
 				<div id="event-name"></div>
 				<div id="angle"><span class="glyphicon glyphicon-arrow-up"></span></div>
 			</div>
+			<div id="log"></div>
 		</div>
-		<div id="log"></div>
 		
 		<script src="../build/j5g3-in-standalone.js"></script>
 		<script>
 		var
+			demo = document.getElementById('demo'),
 			eventName = document.getElementById('event-name'),
 			minimal = document.getElementById('minimal'),
 			radial = document.getElementById('radial'),
 			angle = document.getElementById('angle'),
 			pos = document.getElementById('pos'),
 			log = document.getElementById('log'),
+			scale = document.getElementById('scale'),
+			
 			input,
 			map = {
 				buttonY: 'Y', buttonA: 'A', buttonB: 'B', buttonX: 'X',
@@ -80,7 +71,7 @@
 				move: '<span class="glyphicon glyphicon-move"></span>'
 			}
 		;
-			minimal.onchange = radial.onchange = load;
+			minimal.onchange = radial.onchange = scale.onchange = load;
 			
 			function on_fire(ev)
 			{
@@ -106,15 +97,22 @@
 			{
 				if (input)
 					input.destroy();
+				if (scale.checked)
+				{
+					demo.width = 600;
+					demo.height = 300;
+				} else
+					demo.width = demo.height = undefined;
 					
 				input = j5g3.in({
-					element: 'demo',
+					element: demo,
 					minimal: minimal.checked,
 					on_fire: on_fire
 				});
 				
 				if (radial.checked)
 					input.module.Touch.move_type = 'radial';
+				log.innerHTML = '';
 			}
 			
 			document.addEventListener('touchmove', function(ev) {
