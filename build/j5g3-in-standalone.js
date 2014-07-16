@@ -286,7 +286,7 @@ j5g3.extend(j5g3.in, {
 			if (this.on_fire && this.on_fire(event)===false)
 				return;
 
-			if (this.handlers[event_name])
+			if (this.handlers && this.handlers[event_name])
 			{
 				event.preventDefault();
 				return this.handlers[event_name](event);
@@ -310,6 +310,13 @@ j5g3.extend(j5g3.in, {
 				this.bx = el.clientLeft || 0;
 				this.by = el.clientTop || 0;
 			}
+
+			// Do scaling if element contains width and height attributes (ie Canvas).
+			if (el.width && el.height)
+			{
+				this.sx = el.width / el.clientWidth;
+				this.sy = el.height / el.clientHeight;
+			}
 		},
 
 		_poll: function()
@@ -325,8 +332,8 @@ j5g3.extend(j5g3.in, {
 		 */
 		set_pos: function(x, y)
 		{
-			x = (x * this.sx) - this.bx;
-			y = (y * this.sy) - this.by;
+			x = (x-this.bx) * this.sx;
+			y = (y-this.by) * this.sy;
 
 			this.dx = x - this.x;
 			this.dy = y - this.y;
