@@ -9,7 +9,8 @@
 //if (!('ontouchstart' in window.document))
 //	return;
 
-j5g3.in.Modules.Touch = j5g3.in.Module.extend({
+/** @class */
+j5g3.in.Modules.Touch = j5g3.in.Module.extend(/** @lends j5g3.in.Modules.Touch# */{
 
 	/// Amount of movement required for left/right events
 	x_threshold: 20,

@@ -16,11 +16,10 @@ j5g3.in = function(p) {
 
 };
 
-j5g3.extend(j5g3.in, {
+j5g3.in.Modules = {};
 
-	Modules: {},
-
-	Listener: j5g3.Class.extend({
+	/** @class */
+j5g3.in.Listener = j5g3.Class.extend(/** @lends j5g3.in.Listener# */{
 
 		/// Cursor X position relative to element
 		x: 0,
@@ -220,9 +219,10 @@ j5g3.extend(j5g3.in, {
 				this.module[i].disable();
 		}
 
-	}),
+	});
 
-	Module: j5g3.Class.extend({
+/** @class */
+j5g3.in.Module = j5g3.Class.extend(/** @lends j5g3.in.Module# */{
 
 		/// Handlers
 		handler: null,
@@ -309,9 +309,6 @@ j5g3.extend(j5g3.in, {
 				}
 		}
 
-	})
+	});
 
-});
-
-
-})(this.j5g3, this);
+})(/** @type {object} */ this.j5g3, this);
