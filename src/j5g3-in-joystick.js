@@ -8,7 +8,11 @@
 if (!window.navigator.webkitGetGamepads)
 	return;
 
-j5g3.in.Modules.Joystick= j5g3.in.Module.extend({
+/**
+ * @class
+ * Not Implemented.
+*/
+j5g3.in.Modules.Joystick= j5g3.in.Module.extend(/** @lends j5g3.in.Modules.Joystick# */{
 
 	_enable: function()
 	{

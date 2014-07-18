@@ -25,7 +25,8 @@ var
 	}
 ;
 
-j5g3.in.Modules.Keyboard = j5g3.in.Module.extend({
+/** @class */
+j5g3.in.Modules.Keyboard = j5g3.in.Module.extend(/** @lends j5g3.in.Modules.Keyboard# */{
 
 	keymap: null,
 

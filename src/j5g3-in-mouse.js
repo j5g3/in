@@ -11,7 +11,7 @@
 /**
  * @class Mouse Module
  */
-j5g3.in.Modules.Mouse = j5g3.in.Module.extend({
+j5g3.in.Modules.Mouse = j5g3.in.Module.extend(/** @lends j5g3.in.Modules.Mouse# */{
 
 	/// Mouse x sensitivity
 	x_threshold: 1,
