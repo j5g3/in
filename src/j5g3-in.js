@@ -32,6 +32,11 @@ j5g3.in.Listener = j5g3.Class.extend(/** @lends j5g3.in.Listener# */{
 		/// Change of Y from previous event
 		dy: 0,
 
+		/// Bounding rect offset X
+		bx: 0,
+		/// Bounding rect offset Y
+		by: 0,
+
 		/// Scale of X position
 		sx: 1,
 
