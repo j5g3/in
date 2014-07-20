@@ -49,6 +49,9 @@ j5g3.in.Listener = j5g3.Class.extend(/** @lends j5g3.in.Listener# */{
 		/// Where event handlers are stored
 		handlers: null,
 
+		/// Enable auto scale, true by default, false if run under CocoonJS
+		auto_scale: !!window.CocoonJS,
+
 		/**
 		 * Tells modules to load the minimal number of features to run. This will
 		 * disable move events for mouse.
@@ -164,7 +167,7 @@ j5g3.in.Listener = j5g3.Class.extend(/** @lends j5g3.in.Listener# */{
 			}
 
 			// Do scaling if element contains width and height attributes (ie Canvas).
-			if (el.width && el.height)
+			if (this.auto_resize && el.width && el.height)
 			{
 				this.sx = el.width / el.clientWidth;
 				this.sy = el.height / el.clientHeight;
