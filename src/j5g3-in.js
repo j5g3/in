@@ -7,6 +7,8 @@
 (function(j5g3, window, undefined) {
 "use strict";
 
+var isCocoonJS = window.navigator.isCocoonJS;
+
 /**
  * @namespace j5g3 Input module
  */
@@ -30,6 +32,11 @@ j5g3.in.Listener = j5g3.Class.extend(/** @lends j5g3.in.Listener# */{
 		/// Change of Y from previous event
 		dy: 0,
 
+		/// Bounding rect offset X
+		bx: 0,
+		/// Bounding rect offset Y
+		by: 0,
+
 		/// Scale of X position
 		sx: 1,
 
@@ -48,6 +55,9 @@ j5g3.in.Listener = j5g3.Class.extend(/** @lends j5g3.in.Listener# */{
 
 		/// Where event handlers are stored
 		handlers: null,
+
+		/// Enable auto scale, true by default
+		auto_scale: true,
 
 		/**
 		 * Tells modules to load the minimal number of features to run. This will
@@ -78,11 +88,14 @@ j5g3.in.Listener = j5g3.Class.extend(/** @lends j5g3.in.Listener# */{
 			me.poll = function() { me._poll(); };
 			me.calculate_bound = function(ev) { me._calculate_bound(ev); };
 
-			window.addEventListener('resize', this.calculate_bound);
-			window.addEventListener('scroll', this.calculate_bound);
-			this.intervalId = window.setInterval(this.poll, this.interval);
+			if (!isCocoonJS)
+			{
+				window.addEventListener('resize', this.calculate_bound);
+				window.addEventListener('scroll', this.calculate_bound);
+				this.calculate_bound();
+			}
 
-			this.calculate_bound();
+			this.intervalId = window.setInterval(this.poll, this.interval);
 
 			for (var i in j5g3.in.Modules)
 				me.module[i] = new j5g3.in.Modules[i](me);
@@ -164,7 +177,7 @@ j5g3.in.Listener = j5g3.Class.extend(/** @lends j5g3.in.Listener# */{
 			}
 
 			// Do scaling if element contains width and height attributes (ie Canvas).
-			if (el.width && el.height)
+			if (this.auto_scale && el.width && el.height)
 			{
 				this.sx = el.width / el.clientWidth;
 				this.sy = el.height / el.clientHeight;
