@@ -150,6 +150,13 @@ j5g3.in.Listener = j5g3.Class.extend(/** @lends j5g3.in.Listener# */{
 			this.handlers.splice(i, 1);
 		},
 
+		/** Removes all event handlers */
+		reset: function()
+		{
+			this.handlers = [];
+			this.interval = j5g3.in.Listener.prototype.interval;
+		},
+
 		fire: function(event_name, event)
 		{
 			if (this.disabled)
