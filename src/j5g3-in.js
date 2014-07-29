@@ -67,7 +67,8 @@ j5g3.in.Listener = j5g3.Class.extend(/** @lends j5g3.in.Listener# */{
 		element: null,
 
 		/// Interval between events in microseconds.
-		interval: 60,
+		/// If <code>null</code> it will use requestAnimationFrame.
+		interval: null,
 		intervalId: null,
 
 		/// Where event handlers are stored
@@ -112,7 +113,17 @@ j5g3.in.Listener = j5g3.Class.extend(/** @lends j5g3.in.Listener# */{
 				this.calculate_bound();
 			}
 
-			this.intervalId = window.setInterval(this.poll, this.interval);
+			if (this.interval)
+				this.intervalId = window.setInterval(this.poll, this.interval);
+			else
+			{
+				me.poll = function()
+				{
+					me.poll();
+					window.requestAnimationFrame(me._pollFn);
+				};
+				this.intervalId = window.requestAnimationFrame(me._pollFn);
+			}
 
 			for (var i in j5g3.in.Modules)
 				me.module[i] = new j5g3.in.Modules[i](me);
@@ -208,6 +219,8 @@ j5g3.in.Listener = j5g3.Class.extend(/** @lends j5g3.in.Listener# */{
 			}
 		},
 
+		__pollFn: null,
+
 		_poll: function()
 		{
 			if (this.disabled===false)
@@ -234,10 +247,11 @@ j5g3.in.Listener = j5g3.Class.extend(/** @lends j5g3.in.Listener# */{
 		destroy: function()
 		{
 			this.disable();
+			this.poll = function() { };
 			this.handlers = null;
 			window.removeEventListener('scroll', this.calculate_bound);
 			window.removeEventListener('resize', this.calculate_bound);
-			window.clearInterval(this.poll);
+			window.clearInterval(this.intervalId);
 		},
 
 		enable: function()
