@@ -113,16 +113,16 @@ j5g3.in.Listener = j5g3.Class.extend(/** @lends j5g3.in.Listener# */{
 				this.calculate_bound();
 			}
 
-			if (this.interval)
-				this.intervalId = window.setInterval(this.poll, this.interval);
+			if (me.interval)
+				me.intervalId = me.setInterval(me.poll, me.interval);
 			else
 			{
 				me.poll = function()
 				{
-					me.poll();
-					window.requestAnimationFrame(me._pollFn);
+					me._poll();
+					window.requestAnimationFrame(me.poll);
 				};
-				this.intervalId = window.requestAnimationFrame(me._pollFn);
+				window.requestAnimationFrame(me.poll);
 			}
 
 			for (var i in j5g3.in.Modules)
