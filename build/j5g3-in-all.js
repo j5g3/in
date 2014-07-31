@@ -20,6 +20,23 @@ j5g3.in = function(p) {
 
 j5g3.in.Modules = {};
 
+j5g3.in.Handler = function j5g3inHandler(listener, handlers)
+{
+	this.listener = listener;
+	j5g3.extend(this, handlers);
+};
+
+j5g3.in.Handler.prototype = {
+
+	listener: null,
+
+	remove: function()
+	{
+		this.listener.un(this);
+	}
+
+};
+
 	/** @class */
 j5g3.in.Listener = j5g3.Class.extend(/** @lends j5g3.in.Listener# */{
 
@@ -50,7 +67,8 @@ j5g3.in.Listener = j5g3.Class.extend(/** @lends j5g3.in.Listener# */{
 		element: null,
 
 		/// Interval between events in microseconds.
-		interval: 60,
+		/// If <code>null</code> it will use requestAnimationFrame.
+		interval: null,
 		intervalId: null,
 
 		/// Where event handlers are stored
@@ -83,7 +101,7 @@ j5g3.in.Listener = j5g3.Class.extend(/** @lends j5g3.in.Listener# */{
 				this.element = j5g3.id(this.element);
 
 			me.module = {};
-			me.handlers = {};
+			me.handlers = [];
 
 			me.poll = function() { me._poll(); };
 			me.calculate_bound = function(ev) { me._calculate_bound(ev); };
@@ -95,7 +113,17 @@ j5g3.in.Listener = j5g3.Class.extend(/** @lends j5g3.in.Listener# */{
 				this.calculate_bound();
 			}
 
-			this.intervalId = window.setInterval(this.poll, this.interval);
+			if (me.interval)
+				me.intervalId = me.setInterval(me.poll, me.interval);
+			else
+			{
+				me.poll = function()
+				{
+					me._poll();
+					window.requestAnimationFrame(me.poll);
+				};
+				window.requestAnimationFrame(me.poll);
+			}
 
 			for (var i in j5g3.in.Modules)
 				me.module[i] = new j5g3.in.Modules[i](me);
@@ -116,28 +144,28 @@ j5g3.in.Listener = j5g3.Class.extend(/** @lends j5g3.in.Listener# */{
 
 		/**
 		 * Register an event handler.
-		 * @param {string|object} event_name Name of the event or object with
-		 *                        event mappings.
+		 * @param {object} handlers object with event mappings.
+		 * @return {j5g3.in.Handler} Handler object.
 		 */
-		on: function(event_name, callback)
+		on: function(handlers)
 		{
-			if (typeof event_name==='object')
-			{
-				for (var i in event_name)
-					this.on(i, event_name[i]);
-			} else
-			{
-				if (!callback)
-					throw new Error("callback parameter is required.");
+			var h = new j5g3.in.Handler(this, handlers);
+			this.handlers.push(h);
+			return h;
+		},
 
-				var handler = this.handlers[event_name];
+		/** Remove handler object */
+		un: function(handler)
+		{
+			var i = this.handlers.indexOf(handler);
+			this.handlers.splice(i, 1);
+		},
 
-				this.handlers[event_name] = handler ?
-					function(ev) { handler(ev); callback(ev); } :
-					callback;
-			}
-
-			return this;
+		/** Removes all event handlers */
+		reset: function()
+		{
+			this.handlers = [];
+			this.interval = j5g3.in.Listener.prototype.interval;
 		},
 
 		fire: function(event_name, event)
@@ -148,13 +176,20 @@ j5g3.in.Listener = j5g3.Class.extend(/** @lends j5g3.in.Listener# */{
 			event.j5g3in = this;
 			event.name = event_name;
 
-			if (this.on_fire && this.on_fire(event)===false)
+			if ((this.on_fire && this.on_fire(event)===false) || !this.handlers)
 				return;
 
-			if (this.handlers && this.handlers[event_name])
+			var l = this.handlers.length, ev;
+
+			while (l--)
 			{
-				event.preventDefault();
-				return this.handlers[event_name](event);
+				ev = this.handlers[l][event_name];
+				if (ev)
+				{
+					event.preventDefault();
+					if (ev(event)===false)
+						return;
+				}
 			}
 		},
 
@@ -184,6 +219,8 @@ j5g3.in.Listener = j5g3.Class.extend(/** @lends j5g3.in.Listener# */{
 			}
 		},
 
+		__pollFn: null,
+
 		_poll: function()
 		{
 			if (this.disabled===false)
@@ -210,10 +247,11 @@ j5g3.in.Listener = j5g3.Class.extend(/** @lends j5g3.in.Listener# */{
 		destroy: function()
 		{
 			this.disable();
+			this.poll = function() { };
 			this.handlers = null;
 			window.removeEventListener('scroll', this.calculate_bound);
 			window.removeEventListener('resize', this.calculate_bound);
-			window.clearInterval(this.poll);
+			window.clearInterval(this.intervalId);
 		},
 
 		enable: function()
